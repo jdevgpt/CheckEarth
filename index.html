@@ -47,16 +47,16 @@
 
   <div class="card">
     <label>Provincia / Territorio (opcional)</label>
-    <input id="province" placeholder="ej. Badajoz" type="text" />
+    <input id="province" type="text" value="Badajoz" />
     <div class="small" style="margin-top:6px">Si conoces el valor límite del proyecto para herrajes, introdúcelo abajo; si no, deja vacío.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
       <div>
         <label>Valor límite proyecto (Ω) — herrajes (opcional)</label>
-        <input id="projLimitHerrajes" type="number" step="0.01" placeholder="ej. 10" />
+        <input id="projLimitHerrajes" type="number" step="1" value="497" />
       </div>
       <div>
         <label>Intensidad de defecto estimada Id (A)</label>
-        <input id="Id" type="number" step="1" value="200" />
+        <input id="Id" type="number" step="1" value="300" />
       </div>
     </div>
   </div>

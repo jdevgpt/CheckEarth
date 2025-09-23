@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Checker PAT - CT</title>
+<style>
+  :root{
+    --bg:#f5f6f7;
+    --card:#ffffff;
+    --muted:#9aa0a6;
+    --accent:#ff6a00; /* naranja */
+    --border:#e6e8ea;
+  }
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background:var(--bg); color:#222; margin:0; padding:24px;}
+  .container{max-width:980px;margin:0 auto;}
+  header{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
+  h1{margin:0;font-size:20px;color:#222;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 0 rgba(0,0,0,0.03);}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+  input[type="number"], select, input[type="text"]{width:100%;padding:8px;border-radius:8px;border:1px solid #d6dadc;background:#fff;font-size:14px;}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .tr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;}
+  .btn{background:var(--accent);color:white;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;}
+  .small{font-size:13px;color:var(--muted);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;}
+  th,td{padding:8px;border:1px solid var(--border);text-align:left;font-size:13px;}
+  .ok{color:green;font-weight:700;}
+  .warn{color:var(--accent);font-weight:700;}
+  .def{color:#c0392b;font-weight:800;}
+  footer{font-size:12px;color:var(--muted);margin-top:10px;}
+  @media (max-width:720px){ .row{grid-template-columns:1fr;} .tr-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div style="width:50px;height:50px;border-radius:10px;background:linear-gradient(180deg,#fff,#eee);display:flex;align-items:center;justify-content:center;border:1px solid var(--border)">
+      <strong style="color:var(--accent)">PT</strong>
+    </div>
+    <div>
+      <h1>Checker de Puestas a Tierra (PAT) — CT</h1>
+      <div class="small">Introduce medidas y el visor te dirá si hay defectos según la guía FED029.</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <label>Provincia / Territorio (opcional)</label>
+    <input id="province" placeholder="ej. Badajoz" type="text" />
+    <div class="small" style="margin-top:6px">Si conoces el valor límite del proyecto para herrajes, introdúcelo abajo; si no, deja vacío.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+      <div>
+        <label>Valor límite proyecto (Ω) — herrajes (opcional)</label>
+        <input id="projLimitHerrajes" type="number" step="0.01" placeholder="ej. 10" />
+      </div>
+      <div>
+        <label>Intensidad de defecto estimada Id (A)</label>
+        <input id="Id" type="number" step="1" value="200" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>Herrajes — PAT protección (Rm) en Ω (introduce si lo tienes)</label>
+    <input id="Rm" type="number" step="0.01" placeholder="ej. 6.26" />
+    <div class="small" style="margin-top:6px">Si falta esta medida, el resultado marcará T51D (defecto de conexiones / registro).</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px 0">Transformadores (hasta 6)</h3>
+    <div id="trs"></div>
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button class="btn" id="addTr">Añadir TR</button>
+      <button class="btn" id="resetTr" style="background:#888">Reset</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <button class="btn" id="checkBtn">Comprobar defectos</button>
+    <div id="results"></div>
+  </div>
+
+  <footer class="small card">
+    Basado en la <strong>Guía FED029</strong> (códigos: T51D, T52D, T53D, T55D, T62D, T65D). El informe que genera la app es orientativo y debe contrastarse con la medición en campo y con el proyecto. Referencias en la guía usadas para la lógica.
+  </footer>
+</div>
+
+<script>
+// Basic dynamic TR form
+let maxTR = 6;
+const trsDiv = document.getElementById('trs');
+let trCount = 0;
+
+function addTr(prefill={}){
+  if(trCount>=maxTR) return;
+  trCount++;
+  const id = trCount;
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.id = 'trcard'+id;
+  div.innerHTML = `
+    <strong>TR${id}</strong>
+    <div class="tr-grid" style="margin-top:8px;">
+      <div>
+        <label>Neutro Rn (Ω) — deja vacío si no existe</label>
+        <input type="number" step="0.01" id="Rn_${id}" value="${prefill.Rn||''}" />
+      </div>
+      <div>
+        <label>Acoplamiento Rmn (Ω)</label>
+        <input type="number" step="0.01" id="Rmn_${id}" value="${prefill.Rmn||''}" />
+      </div>
+      <div>
+        <label>PAT servicio Rn_service (Ω) (opcional)</label>
+        <input type="number" step="0.01" id="Rnserv_${id}" value="${prefill.Rnserv||''}" />
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button onclick="removeTr(${id})" type="button" class="btn" style="background:#c0392b">Eliminar</button>
+    </div>
+  `;
+  trsDiv.appendChild(div);
+  updateAddBtn();
+}
+
+function removeTr(id){
+  const el = document.getElementById('trcard'+id);
+  if(el){ el.remove(); trCount--; }
+  updateAddBtn();
+}
+
+function updateAddBtn(){
+  document.getElementById('addTr').disabled = trCount>=maxTR;
+}
+
+document.getElementById('addTr').addEventListener('click',()=>addTr());
+document.getElementById('resetTr').addEventListener('click',()=>{
+  trsDiv.innerHTML=''; trCount=0; updateAddBtn();
+});
+
+// Add two default TRs
+addTr(); addTr();
+
+function nm(v){ return v===null || v==='' || isNaN(Number(v)) ? null : Number(v); }
+
+document.getElementById('checkBtn').addEventListener('click', ()=>{
+  const Rm = nm(document.getElementById('Rm').value);
+  const Id = nm(document.getElementById('Id').value) || 0;
+  const projLimitHerrajes = nm(document.getElementById('projLimitHerrajes').value);
+  const province = document.getElementById('province').value || '';
+  const results = [];
+  // T51D: if Rm missing -> defect of PAT protección connections/register
+  if(Rm===null){
+    results.push({code:'T51D', type:'defecto', text:'No existe registro de la PAT de protección o herrajes sin medida. Imposible verificar conexiones (T51D).'});
+  } else {
+    results.push({code:'RM', type:'info', text:`Herrajes (Rm) = ${Rm.toFixed(2)} Ω`});
+    // If project limit given, compare
+    if(projLimitHerrajes!==null){
+      if(Rm > projLimitHerrajes) results.push({code:'T53D', type:'defecto', text:`Herrajes Rm supera límite de proyecto (${Rm.toFixed(2)} Ω > ${projLimitHerrajes} Ω) — defecto T53D (resistencia inadecuada).`});
+      else results.push({code:'T53D', type:'ok', text:`Herrajes Rm cumple el límite de proyecto (${Rm.toFixed(2)} Ω ≤ ${projLimitHerrajes} Ω).`});
+    } else {
+      results.push({code:'T53D', type:'warn', text:'No se proporcionó límite de proyecto ni tabla territorial; para T53D necesitas el valor del proyecto o tabla territorial.'});
+    }
+  }
+
+  // Iterate TRs
+  for(let i=1;i<=6;i++){
+    const Rn = nm(document.getElementById('Rn_'+i)?.value);
+    const Rmn = nm(document.getElementById('Rmn_'+i)?.value);
+    const Rnserv = nm(document.getElementById('Rnserv_'+i)?.value);
+    if(document.getElementById('trcard'+i)){
+      const label = 'TR'+i;
+      // T65D: no existe PAT del neutro
+      if(Rn===null){
+        results.push({code:'T65D', tr:label, type:'defecto', text:`${label}: No existe medición del neutro (PAT del neutro ausente) — T65D.`});
+      } else {
+        results.push({code:'RN', tr:label, type:'info', text:`${label}: Neutro Rn = ${Rn.toFixed(2)} Ω.`});
+      }
+      // T62D: PAT de servicio >37Ω (if Rnserv provided)
+      if(Rnserv!==null){
+        if(Rnserv > 37) results.push({code:'T62D', tr:label, type:'defecto', text:`${label}: PAT de servicio Rn_service = ${Rnserv.toFixed(2)} Ω > 37 Ω → defecto T62D.`});
+        else results.push({code:'T62D', tr:label, type:'ok', text:`${label}: PAT de servicio en rango (${Rnserv.toFixed(2)} Ω ≤ 37 Ω).`});
+      }
+      // T55D: compute Rc if possible
+      if(Rm!==null && Rn!==null && Rmn!==null){
+        const Rc = (Rm + Rn - Rmn)/2.0;
+        const Vd = Rc * Id;
+        const Idcrit = Id>0 ? (1000.0 / Rc) : null;
+        let note='';
+        if(Id>0){
+          if(Vd>1000) note = `${label}: Rc=${Rc.toFixed(2)} Ω → Vd=${Vd.toFixed(1)} V (>1000V) → defecto T55D (resistencia de acoplamiento inadecuada).`;
+          else note = `${label}: Rc=${Rc.toFixed(2)} Ω → Vd=${Vd.toFixed(1)} V (≤1000V) → no defecto T55D para Id=${Id} A.`;
+        } else {
+          note = `${label}: Rc=${Rc.toFixed(2)} Ω. Proporciona Id para evaluar T55D (Vd = Rc * Id).`;
+        }
+        results.push({code:'T55D', tr:label, type: Vd>1000 ? 'defecto' : 'ok', text:note, Rc:Rc, Vd:Vd, Idcrit:Idcrit});
+      } else {
+        // if any value missing, warn
+        if(document.getElementById('Rn_'+i) && (Rn===null || Rmn===null)){
+          results.push({code:'T55D', tr:label, type:'warn', text:`${label}: faltan datos (Rm, Rn o Rmn) para calcular Rc y evaluar T55D.`});
+        }
+      }
+    }
+  }
+
+  // Render results
+  const out = document.getElementById('results');
+  out.innerHTML='';
+  const table = document.createElement('table');
+  table.innerHTML = '<tr><th>Código</th><th>TR</th><th>Resultado</th><th>Explicación</th></tr>';
+  results.forEach(r=>{
+    const tr = document.createElement('tr');
+    const code = document.createElement('td'); code.textContent = r.code;
+    const trcell = document.createElement('td'); trcell.textContent = r.tr||'-';
+    const res = document.createElement('td'); res.textContent = r.type;
+    if(r.type==='defecto') res.className='def';
+    if(r.type==='warn') res.className='warn';
+    if(r.type==='ok') res.className='ok';
+    const expl = document.createElement('td'); expl.textContent = r.text;
+    tr.appendChild(code); tr.appendChild(trcell); tr.appendChild(res); tr.appendChild(expl);
+    table.appendChild(tr);
+  });
+  out.appendChild(table);
+});
+</script>
+</body>
+</html>

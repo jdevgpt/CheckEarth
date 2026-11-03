@@ -1,227 +1,544 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Checker PAT - CT</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ff6a00">
+<title>CheckEarth · PAT</title>
 <style>
-  :root{
-    --bg:#f5f6f7;
-    --card:#ffffff;
-    --muted:#9aa0a6;
-    --accent:#ff6a00; /* naranja */
-    --border:#e6e8ea;
-  }
-  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-    background:var(--bg); color:#222; margin:0; padding:24px;}
-  .container{max-width:980px;margin:0 auto;}
-  header{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
-  h1{margin:0;font-size:20px;color:#222;}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 0 rgba(0,0,0,0.03);}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
-  input[type="number"], select, input[type="text"]{width:100%;padding:8px;border-radius:8px;border:1px solid #d6dadc;background:#fff;font-size:14px;}
-  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-  .tr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;}
-  .btn{background:var(--accent);color:white;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;}
-  .small{font-size:13px;color:var(--muted);}
-  table{width:100%;border-collapse:collapse;margin-top:10px;}
-  th,td{padding:8px;border:1px solid var(--border);text-align:left;font-size:13px;}
-  .ok{color:green;font-weight:700;}
-  .warn{color:var(--accent);font-weight:700;}
-  .def{color:#c0392b;font-weight:800;}
-  footer{font-size:12px;color:var(--muted);margin-top:10px;}
-  @media (max-width:720px){ .row{grid-template-columns:1fr;} .tr-grid{grid-template-columns:1fr;}}
+:root{
+  --bg:#f4f5f6; --card:#fff; --ink:#1f2328; --muted:#6b7178; --line:#e3e6e9;
+  --accent:#ff6a00; --accent-soft:#fff1e7;
+  --ok:#1e8e3e; --ok-soft:#e8f5ec;
+  --bad:#c62828; --bad-soft:#fdecec;
+  --warn:#b26a00; --warn-soft:#fff6e0;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);
+  padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+header h1{font-size:17px;margin:0;line-height:1.1}
+header small{color:var(--muted);font-size:12px}
+.hbtn{margin-left:auto;display:flex;gap:6px}
+.icon{border:1px solid var(--line);background:#fff;border-radius:10px;height:38px;min-width:38px;padding:0 10px;color:var(--ink);font-size:13px;font-weight:600}
+main{max-width:760px;margin:0 auto;padding:14px 14px 120px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.card h2 .tag{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:600}
+.grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.grid .full{grid-column:1/-1}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600}
+input[type=text],input[type=date],input[type=number],input.num{width:100%;height:46px;border:1px solid #d3d7db;border-radius:10px;padding:0 12px;font-size:17px;background:#fff;color:var(--ink)}
+input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+input:disabled{background:#f1f2f3;color:#aaa}
+select{width:100%;height:46px;border:1px solid #d3d7db;border-radius:10px;padding:0 12px;font-size:17px;background:#fff;color:var(--ink);appearance:auto}
+select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.provinfo{font-size:12.5px;margin-top:6px;border-radius:8px;padding:7px 10px;background:#f1f2f3;color:var(--muted)}
+.provinfo.ok{background:var(--accent-soft);color:#8a3b00}
+.provinfo.none{background:var(--warn-soft);color:var(--warn)}
+.provinfo a{color:inherit;font-weight:700}
+.sep{border:0;border-top:1px solid var(--line);margin:16px 0}
+.ptable{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.ptable th,.ptable td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+.ptable th{color:var(--muted);font-weight:600;font-size:12px}
+.ptable tr.cur td{background:var(--accent-soft)}
+.unit{position:relative}
+.unit input{padding-right:34px}
+.unit span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.chk{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);margin-top:8px;user-select:none}
+.chk input{width:20px;height:20px;accent-color:var(--accent)}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.tr{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fcfcfd}
+.tr-head{display:flex;align-items:center;margin-bottom:8px}
+.tr-head b{font-size:15px}
+.tr-calc{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12.5px;background:#eef0f2;border-radius:999px;padding:4px 9px;color:#333}
+.pill.bad{background:var(--bad-soft);color:var(--bad);font-weight:700}
+.pill.ok{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.del{margin-left:auto;border:0;background:none;color:var(--bad);font-size:13px;font-weight:600;padding:6px}
+.add{width:100%;height:44px;border:1.5px dashed var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:10px;font-weight:700}
+.add:disabled{opacity:.4}
+/* resultados */
+.summary{border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.summary .big{font-size:28px;font-weight:800;line-height:1}
+.summary.s-ok{background:var(--ok-soft);color:var(--ok)}
+.summary.s-bad{background:var(--bad-soft);color:var(--bad)}
+.summary.s-pend{background:#eef0f2;color:var(--muted)}
+.summary .txt{font-weight:700}
+.summary .txt small{display:block;font-weight:500;opacity:.85;margin-top:2px}
+.res{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.res:first-of-type{border-top:0}
+.code{flex:none;font-size:12px;font-weight:800;border-radius:7px;padding:4px 7px;height:fit-content;min-width:52px;text-align:center}
+.res.d .code{background:var(--bad);color:#fff}
+.res.w .code{background:var(--warn-soft);color:var(--warn)}
+.res.o .code{background:var(--ok-soft);color:var(--ok)}
+.res.p .code{background:#eef0f2;color:var(--muted)}
+.res .t{font-size:14.5px;font-weight:650}
+.res .x{font-size:13px;color:var(--muted);margin-top:2px}
+.filter{display:flex;gap:6px;margin:4px 0 6px}
+.filter button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.filter button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* barra inferior */
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:8px;z-index:10}
+.bar>div{max-width:760px;margin:0 auto;display:flex;gap:8px;width:100%}
+.b{flex:1;height:48px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:700;color:var(--ink)}
+.b.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.b.wa{background:#25d366;border-color:#25d366;color:#fff}
+/* modales */
+dialog{border:0;border-radius:18px;padding:0;width:min(560px,94vw);max-height:88vh}
+dialog::backdrop{background:rgba(20,22,25,.45)}
+.mh{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+.mh b{font-size:16px}
+.mh button{margin-left:auto}
+.mb{padding:14px 16px;overflow:auto}
+.hist{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.hist .m{flex:1;min-width:0}
+.hist .m b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist .m small{color:var(--muted)}
+.badge{font-size:12px;font-weight:800;border-radius:999px;padding:3px 9px}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.empty{color:var(--muted);text-align:center;padding:24px 0;font-size:14px}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.formula{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#f6f7f8;border-radius:8px;padding:8px 10px;color:#333;margin-top:8px}
+@media (max-width:420px){.grid{grid-template-columns:1fr}.grid.keep{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <div style="width:50px;height:50px;border-radius:10px;background:linear-gradient(180deg,#fff,#eee);display:flex;align-items:center;justify-content:center;border:1px solid var(--border)">
-      <strong style="color:var(--accent)">PT</strong>
-    </div>
-    <div>
-      <h1>Checker de Puestas a Tierra (PAT) — CT</h1>
-      <div class="small">Introduce medidas y el visor te dirá si hay defectos según la guía FED029.</div>
-    </div>
-  </header>
+<header>
+  <div class="logo">PT</div>
+  <div><h1>CheckEarth</h1><small>Defectos en PAT · CD/CT</small></div>
+  <div class="hbtn">
+    <button class="icon" id="btnHist" aria-label="Historial">Historial</button>
+    <button class="icon" id="btnCfg" aria-label="Criterios">⚙</button>
+  </div>
+</header>
 
-  <div class="card">
-    <label>Provincia / Territorio (opcional)</label>
-    <input id="province" type="text" value="Badajoz" />
-    <div class="small" style="margin-top:6px">Si conoces el valor límite del proyecto para herrajes, introdúcelo abajo; si no, deja vacío.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-      <div>
-        <label>Valor límite proyecto (Ω) — herrajes (opcional)</label>
-        <input id="projLimitHerrajes" type="number" step="1" value="497" />
+<main>
+  <section class="card">
+    <h2>Identificación</h2>
+    <div class="grid keep">
+      <div class="full"><label class="f" for="prov">Provincia</label>
+        <select id="prov"></select>
+        <div class="provinfo" id="provInfo"></div></div>
+      <div class="full"><label class="f" for="linea">Línea</label><input type="text" id="linea" placeholder="Nombre de la línea" autocomplete="off"></div>
+      <div><label class="f" for="cd">Nº CD / CT</label><input type="text" id="cd" placeholder="Ej. 140123" autocomplete="off"></div>
+      <div><label class="f" for="fecha">Fecha</label><input type="date" id="fecha"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>PAT de protección (herrajes)</h2>
+    <div class="grid">
+      <div class="full">
+        <label class="f" for="Rm">Rm · resistencia de herrajes</label>
+        <div class="unit"><input class="num" id="Rm" inputmode="decimal" placeholder="Ej. 6,26"><span>Ω</span></div>
+        <label class="chk"><input type="checkbox" id="RmNo"> No existe PAT de protección / sin registro</label>
       </div>
       <div>
-        <label>Intensidad de defecto estimada Id (A)</label>
-        <input id="Id" type="number" step="1" value="300" />
+        <label class="f" for="lim">Límite del proyecto</label>
+        <div class="unit"><input class="num" id="lim" inputmode="decimal" placeholder="Opcional"><span>Ω</span></div>
+      </div>
+      <div>
+        <label class="f" for="Id">Intensidad de defecto Id</label>
+        <div class="unit"><input class="num" id="Id" inputmode="decimal"><span>A</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <label>Herrajes — PAT protección (Rm) en Ω (introduce si lo tienes)</label>
-    <input id="Rm" type="number" step="0.01" placeholder="ej. 6.26" />
-    <div class="small" style="margin-top:6px">Si falta esta medida, el resultado marcará T51D (defecto de conexiones / registro).</div>
-  </div>
-
-  <div class="card">
-    <h3 style="margin:0 0 8px 0">Transformadores (hasta 6)</h3>
+  <section class="card">
+    <h2>Transformadores <span class="tag" id="trCount"></span></h2>
     <div id="trs"></div>
-    <div style="margin-top:8px;display:flex;gap:8px;">
-      <button class="btn" id="addTr">Añadir TR</button>
-      <button class="btn" id="resetTr" style="background:#888">Reset</button>
+    <button class="add" id="addTr">+ Añadir transformador</button>
+  </section>
+
+  <section class="card" id="resCard">
+    <h2>Resultado</h2>
+    <div id="summary"></div>
+    <div class="filter" id="filter">
+      <button data-f="def" class="on">Defectos y avisos</button>
+      <button data-f="all">Todo</button>
     </div>
-  </div>
-
-  <div class="card">
-    <button class="btn" id="checkBtn">Comprobar defectos</button>
     <div id="results"></div>
-  </div>
+  </section>
+</main>
 
-  <footer class="small card">
-    Basado en la <strong>Guía FED029</strong> (códigos: T51D, T52D, T53D, T55D, T62D, T65D). El informe que genera la app es orientativo y debe contrastarse con la medición en campo y con el proyecto. Referencias en la guía usadas para la lógica.
-  </footer>
-</div>
+<div class="bar"><div>
+  <button class="b" id="btnNew">Nuevo</button>
+  <button class="b wa" id="btnShare">Compartir</button>
+  <button class="b p" id="btnSave">Guardar</button>
+</div></div>
+
+<dialog id="dlgCfg">
+  <div class="mh"><b>Criterios de comprobación</b><button class="icon" data-close>Cerrar</button></div>
+  <div class="mb">
+    <label class="f" style="font-size:13px;color:var(--ink)">Valores por provincia</label>
+    <select id="pSel" style="margin-bottom:10px"></select>
+    <div class="grid keep">
+      <div><label class="f" for="pId">Intensidad de defecto Id</label><div class="unit"><input class="num" id="pId" inputmode="decimal" placeholder="General"><span>A</span></div></div>
+      <div><label class="f" for="pLim">Límite herrajes (T53D)</label><div class="unit"><input class="num" id="pLim" inputmode="decimal" placeholder="Sin dato"><span>Ω</span></div></div>
+      <div><label class="f" for="pVmax">Tensión máx. (T55D)</label><div class="unit"><input class="num" id="pVmax" inputmode="decimal" placeholder="General"><span>V</span></div></div>
+      <div><label class="f" for="pRn">Rn máx. neutro (T62D)</label><div class="unit"><input class="num" id="pRn" inputmode="decimal" placeholder="General"><span>Ω</span></div></div>
+    </div>
+    <p class="hint">Deja un campo vacío para usar el valor general. Los cambios se aplican al momento.</p>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="b" id="pDefault">Fijar como predeterminada</button>
+      <button class="b" id="pClear" style="color:var(--bad)">Borrar valores</button>
+    </div>
+    <div id="pTable"></div>
+
+    <hr class="sep">
+    <label class="f" style="font-size:13px;color:var(--ink)">Valores generales (si la provincia no tiene)</label>
+    <div class="grid keep">
+      <div><label class="f" for="cId">Id</label><div class="unit"><input class="num" id="cId" inputmode="decimal"><span>A</span></div></div>
+      <div><label class="f" for="cVmax">Tensión máx.</label><div class="unit"><input class="num" id="cVmax" inputmode="decimal"><span>V</span></div></div>
+      <div><label class="f" for="cRn">Rn máx. neutro</label><div class="unit"><input class="num" id="cRn" inputmode="decimal"><span>Ω</span></div></div>
+    </div>
+    <div class="formula">Rc = (Rm + Rn − Rmn) / 2<br>Vd = Rc × Id &nbsp;→ T55D si Vd &gt; Vmáx</div>
+
+    <hr class="sep">
+    <label class="f" style="font-size:13px;color:var(--ink)">Compartir la tabla con compañeros</label>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="b" id="pExport">Exportar tabla</button>
+      <button class="b" id="pImport">Importar tabla</button>
+    </div>
+    <input type="file" id="pFile" accept=".json,application/json" hidden>
+    <p class="hint">Los valores se guardan en este dispositivo. Exporta el archivo y pásalo a quien lo necesite para que importe los mismos valores.</p>
+    <button class="b" id="cfgReset" style="width:100%;margin-top:6px">Restaurar valores de fábrica</button>
+  </div>
+</dialog>
+
+<dialog id="dlgHist">
+  <div class="mh"><b>Historial</b><button class="icon" data-close>Cerrar</button></div>
+  <div class="mb">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="b" id="btnCsv">Exportar Excel (CSV)</button>
+      <button class="b" id="btnClear" style="color:var(--bad)">Borrar todo</button>
+    </div>
+    <div id="histList"></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// Basic dynamic TR form
-let maxTR = 6;
-const trsDiv = document.getElementById('trs');
-let trCount = 0;
+(()=>{
+const MAX_TR=6;
+const DEF_CFG={Vmax:1000,RnMax:37,Id:300};
+const DEF_PROV='Badajoz';
+const PROVINCIAS=['A Coruña','Álava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Baleares','Barcelona','Burgos','Cáceres','Cádiz','Cantabria','Castellón','Ceuta','Ciudad Real','Córdoba','Cuenca','Girona','Granada','Guadalajara','Guipúzcoa','Huelva','Huesca','Jaén','La Rioja','Las Palmas','León','Lleida','Lugo','Madrid','Málaga','Melilla','Murcia','Navarra','Ourense','Palencia','Pontevedra','Salamanca','Santa Cruz de Tenerife','Segovia','Sevilla','Soria','Tarragona','Teruel','Toledo','Valencia','Valladolid','Vizcaya','Zamora','Zaragoza'];
+/* ===== TABLA POR PROVINCIA (valores de fábrica) =====
+   Rellena aquí los valores de la guía para que todo el que abra la app los tenga.
+   Campos: Id (A), Lim (Ω, límite herrajes T53D), Vmax (V), RnMax (Ω). Omite los que usen el valor general. */
+const TABLA_BASE={
+  'Badajoz':{Id:300,Lim:497}
+};
+const $=id=>document.getElementById(id);
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const _c=store.get('ce_cfg',{});
+let cfg={Vmax:_c.Vmax||DEF_CFG.Vmax,RnMax:_c.RnMax||DEF_CFG.RnMax,Id:_c.Id||DEF_CFG.Id};
+let ptab=store.get('ce_prov',null)||clone(TABLA_BASE);
+let defProv=store.get('ce_defprov',DEF_PROV);
+const PKEYS=['Id','Lim','Vmax','RnMax'];
+function eff(p){const v=ptab[p]||{};return{Id:v.Id??cfg.Id,Lim:v.Lim??null,Vmax:v.Vmax??cfg.Vmax,RnMax:v.RnMax??cfg.RnMax,has:PKEYS.some(k=>v[k]!=null)}}
+const curProv=()=>$('prov').value||defProv;
+let trs=[];          // [{Rn:'',RnNo:false,Rmn:''}]
+let filter='def';
+let editingId=null;  // id del registro de historial cargado
 
-function addTr(prefill={}){
-  if(trCount>=maxTR) return;
-  trCount++;
-  const id = trCount;
-  const div = document.createElement('div');
-  div.className = 'card';
-  div.id = 'trcard'+id;
-  div.innerHTML = `
-    <strong>TR${id}</strong>
-    <div class="tr-grid" style="margin-top:8px;">
-      <div>
-        <label>Neutro Rn (Ω) — deja vacío si no existe</label>
-        <input type="number" step="0.01" id="Rn_${id}" value="${prefill.Rn||''}" />
+const num=v=>{if(v===null||v===undefined)return null;const s=String(v).trim().replace(',','.');if(s==='')return null;const n=Number(s);return isFinite(n)?n:null};
+const f2=n=>n.toLocaleString('es-ES',{maximumFractionDigits:2});
+const f1=n=>n.toLocaleString('es-ES',{maximumFractionDigits:1});
+const today=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1800)}
+
+/* ---------- Transformadores ---------- */
+function renderTrs(){
+  const box=$('trs');box.innerHTML='';
+  trs.forEach((t,i)=>{
+    const d=document.createElement('div');d.className='tr';
+    d.innerHTML=`
+      <div class="tr-head"><b>TR${i+1}</b>${trs.length>1?`<button class="del" data-del="${i}">Eliminar</button>`:''}</div>
+      <div class="grid keep">
+        <div><label class="f">Rn · neutro (servicio)</label>
+          <div class="unit"><input class="num" data-i="${i}" data-k="Rn" inputmode="decimal" value="${esc(t.Rn)}" ${t.RnNo?'disabled':''}><span>Ω</span></div></div>
+        <div><label class="f">Rmn · herrajes–neutro</label>
+          <div class="unit"><input class="num" data-i="${i}" data-k="Rmn" inputmode="decimal" value="${esc(t.Rmn)}" ${t.RnNo?'disabled':''}><span>Ω</span></div></div>
       </div>
-      <div>
-        <label>Acoplamiento Rmn (Ω)</label>
-        <input type="number" step="0.01" id="Rmn_${id}" value="${prefill.Rmn||''}" />
-      </div>
-      <div>
-        <label>PAT servicio Rn_service (Ω) (opcional)</label>
-        <input type="number" step="0.01" id="Rnserv_${id}" value="${prefill.Rnserv||''}" />
-      </div>
-    </div>
-    <div style="margin-top:8px;display:flex;gap:8px;">
-      <button onclick="removeTr(${id})" type="button" class="btn" style="background:#c0392b">Eliminar</button>
-    </div>
-  `;
-  trsDiv.appendChild(div);
-  updateAddBtn();
-}
-
-function removeTr(id){
-  const el = document.getElementById('trcard'+id);
-  if(el){ el.remove(); trCount--; }
-  updateAddBtn();
-}
-
-function updateAddBtn(){
-  document.getElementById('addTr').disabled = trCount>=maxTR;
-}
-
-document.getElementById('addTr').addEventListener('click',()=>addTr());
-document.getElementById('resetTr').addEventListener('click',()=>{
-  trsDiv.innerHTML=''; trCount=0; updateAddBtn();
-});
-
-// Add two default TRs
-addTr(); addTr();
-
-function nm(v){ return v===null || v==='' || isNaN(Number(v)) ? null : Number(v); }
-
-document.getElementById('checkBtn').addEventListener('click', ()=>{
-  const Rm = nm(document.getElementById('Rm').value);
-  const Id = nm(document.getElementById('Id').value) || 0;
-  const projLimitHerrajes = nm(document.getElementById('projLimitHerrajes').value);
-  const province = document.getElementById('province').value || '';
-  const results = [];
-  // T51D: if Rm missing -> defect of PAT protección connections/register
-  if(Rm===null){
-    results.push({code:'T51D', type:'defecto', text:'No existe registro de la PAT de protección o herrajes sin medida. Imposible verificar conexiones (T51D).'});
-  } else {
-    results.push({code:'RM', type:'info', text:`Herrajes (Rm) = ${Rm.toFixed(2)} Ω`});
-    // If project limit given, compare
-    if(projLimitHerrajes!==null){
-      if(Rm > projLimitHerrajes) results.push({code:'T53D', type:'defecto', text:`Herrajes Rm supera límite de proyecto (${Rm.toFixed(2)} Ω > ${projLimitHerrajes} Ω) — defecto T53D (resistencia inadecuada).`});
-      else results.push({code:'T53D', type:'ok', text:`Herrajes Rm cumple el límite de proyecto (${Rm.toFixed(2)} Ω ≤ ${projLimitHerrajes} Ω).`});
-    } else {
-      results.push({code:'T53D', type:'warn', text:'No se proporcionó límite de proyecto ni tabla territorial; para T53D necesitas el valor del proyecto o tabla territorial.'});
-    }
-  }
-
-  // Iterate TRs
-  for(let i=1;i<=6;i++){
-    const Rn = nm(document.getElementById('Rn_'+i)?.value);
-    const Rmn = nm(document.getElementById('Rmn_'+i)?.value);
-    const Rnserv = nm(document.getElementById('Rnserv_'+i)?.value);
-    if(document.getElementById('trcard'+i)){
-      const label = 'TR'+i;
-      // T65D: no existe PAT del neutro
-      if(Rn===null){
-        results.push({code:'T65D', tr:label, type:'defecto', text:`${label}: No existe medición del neutro (PAT del neutro ausente) — T65D.`});
-      } else {
-        results.push({code:'RN', tr:label, type:'info', text:`${label}: Neutro Rn = ${Rn.toFixed(2)} Ω.`});
-      }
-      // T62D: PAT de servicio >37Ω (if Rnserv provided)
-      if(Rnserv!==null){
-        if(Rnserv > 37) results.push({code:'T62D', tr:label, type:'defecto', text:`${label}: PAT de servicio Rn_service = ${Rnserv.toFixed(2)} Ω > 37 Ω → defecto T62D.`});
-        else results.push({code:'T62D', tr:label, type:'ok', text:`${label}: PAT de servicio en rango (${Rnserv.toFixed(2)} Ω ≤ 37 Ω).`});
-      }
-      // T55D: compute Rc if possible
-      if(Rm!==null && Rn!==null && Rmn!==null){
-        const Rc = (Rm + Rn - Rmn)/2.0;
-        const Vd = Rc * Id;
-        const Idcrit = Id>0 ? (1000.0 / Rc) : null;
-        let note='';
-        if(Id>0){
-          if(Vd>1000) note = `${label}: Rc=${Rc.toFixed(2)} Ω → Vd=${Vd.toFixed(1)} V (>1000V) → defecto T55D (resistencia de acoplamiento inadecuada).`;
-          else note = `${label}: Rc=${Rc.toFixed(2)} Ω → Vd=${Vd.toFixed(1)} V (≤1000V) → no defecto T55D para Id=${Id} A.`;
-        } else {
-          note = `${label}: Rc=${Rc.toFixed(2)} Ω. Proporciona Id para evaluar T55D (Vd = Rc * Id).`;
-        }
-        results.push({code:'T55D', tr:label, type: Vd>1000 ? 'defecto' : 'ok', text:note, Rc:Rc, Vd:Vd, Idcrit:Idcrit});
-      } else {
-        // if any value missing, warn
-        if(document.getElementById('Rn_'+i) && (Rn===null || Rmn===null)){
-          results.push({code:'T55D', tr:label, type:'warn', text:`${label}: faltan datos (Rm, Rn o Rmn) para calcular Rc y evaluar T55D.`});
-        }
-      }
-    }
-  }
-
-  // Render results
-  const out = document.getElementById('results');
-  out.innerHTML='';
-  const table = document.createElement('table');
-  table.innerHTML = '<tr><th>Código</th><th>TR</th><th>Resultado</th><th>Explicación</th></tr>';
-  results.forEach(r=>{
-    const tr = document.createElement('tr');
-    const code = document.createElement('td'); code.textContent = r.code;
-    const trcell = document.createElement('td'); trcell.textContent = r.tr||'-';
-    const res = document.createElement('td'); res.textContent = r.type;
-    if(r.type==='defecto') res.className='def';
-    if(r.type==='warn') res.className='warn';
-    if(r.type==='ok') res.className='ok';
-    const expl = document.createElement('td'); expl.textContent = r.text;
-    tr.appendChild(code); tr.appendChild(trcell); tr.appendChild(res); tr.appendChild(expl);
-    table.appendChild(tr);
+      <label class="chk"><input type="checkbox" data-i="${i}" data-k="RnNo" ${t.RnNo?'checked':''}> No existe PAT de neutro</label>
+      <div class="tr-calc" id="calc${i}"></div>`;
+    box.appendChild(d);
   });
-  out.appendChild(table);
+  $('addTr').disabled=trs.length>=MAX_TR;
+  $('trCount').textContent=`${trs.length} de ${MAX_TR}`;
+}
+$('trs').addEventListener('input',e=>{
+  const i=e.target.dataset.i,k=e.target.dataset.k;if(i===undefined)return;
+  if(k==='RnNo'){trs[i].RnNo=e.target.checked;renderTrs()}
+  else trs[i][k]=e.target.value;
+  update();
 });
+$('trs').addEventListener('click',e=>{
+  const i=e.target.dataset.del;if(i===undefined)return;
+  trs.splice(+i,1);renderTrs();update();
+});
+$('addTr').onclick=()=>{if(trs.length<MAX_TR){trs.push({Rn:'',RnNo:false,Rmn:''});renderTrs();update();
+  const ins=$('trs').querySelectorAll('.tr');ins[ins.length-1].querySelector('input').focus()}};
+
+/* ---------- Motor de comprobación ---------- */
+function evaluate(){
+  const Rm=num($('Rm').value),RmNo=$('RmNo').checked;
+  const lim=num($('lim').value),Id=num($('Id').value);
+  const E=eff(curProv());const out=[];const calcs=[];
+  const add=(type,code,title,detail,tr)=>out.push({type,code,title,detail,tr});
+
+  // Herrajes
+  if(RmNo){
+    add('d','T51D','PAT de protección inexistente o sin registro','No se puede medir la resistencia de herrajes ni verificar sus conexiones.');
+  }else if(Rm===null){
+    add('p','Rm','Falta la medida de herrajes (Rm)','Introdúcela o marca “No existe PAT de protección”.');
+  }else{
+    add('o','Rm',`Herrajes Rm = ${f2(Rm)} Ω`,'Medida registrada.');
+    if(lim!==null){
+      if(Rm>lim) add('d','T53D','Resistencia de herrajes superior al proyecto',`Rm ${f2(Rm)} Ω > límite ${f2(lim)} Ω.`);
+      else add('o','T53D','Herrajes dentro del límite del proyecto',`Rm ${f2(Rm)} Ω ≤ ${f2(lim)} Ω.`);
+    }else add('w','T53D','Sin límite de herrajes',`No hay valor para ${curProv()}. Introdúcelo arriba o configúralo en ⚙ para comprobar T53D.`);
+  }
+  if(Id===null||Id<=0) add('w','Id','Falta la intensidad de defecto Id','Sin Id no se puede calcular la tensión de defecto (T55D).');
+
+  // TRs
+  trs.forEach((t,i)=>{
+    const L=`TR${i+1}`;const c={i};
+    if(t.RnNo){add('d','T65D','No existe PAT del neutro',`${L}: sin puesta a tierra de servicio.`,L);calcs.push(c);return}
+    const Rn=num(t.Rn),Rmn=num(t.Rmn);
+    if(Rn===null){add('p','Rn','Falta Rn',`${L}: introduce la PAT del neutro o marca “No existe”.`,L)}
+    else if(Rn>E.RnMax){add('d','T62D','PAT de servicio (neutro) elevada',`${L}: Rn ${f2(Rn)} Ω > ${f2(E.RnMax)} Ω.`,L);c.rnBad=true}
+    else add('o','T62D','PAT de neutro correcta',`${L}: Rn ${f2(Rn)} Ω ≤ ${f2(E.RnMax)} Ω.`,L);
+    c.Rn=Rn;
+
+    if(Rn===null||Rmn===null||Rm===null||RmNo){
+      if(Rn!==null&&!RmNo) add('p','T55D','Faltan datos para el acoplamiento',`${L}: necesito Rm, Rn y Rmn para calcular Rc.`,L);
+      calcs.push(c);return;
+    }
+    const Rc=(Rm+Rn-Rmn)/2;c.Rc=Rc;
+    if(Rmn>Rm+Rn||Rmn<Math.abs(Rm-Rn)){
+      add('w','MED','Medidas incoherentes',`${L}: con Rm ${f2(Rm)}, Rn ${f2(Rn)} y Rmn ${f2(Rmn)} Ω sale Rc = ${f2(Rc)} Ω, fuera de rango físico (0 ≤ Rc ≤ ${f2(Math.min(Rm,Rn))}). Repite la medida.`,L);
+      c.bad=true;calcs.push(c);return;
+    }
+    if(Id!==null&&Id>0){
+      const Vd=Rc*Id;c.Vd=Vd;c.IdMax=Rc>0?E.Vmax/Rc:Infinity;c.RcMax=E.Vmax/Id;
+      if(Vd>E.Vmax){c.vdBad=true;add('d','T55D','Resistencia de acoplamiento inadecuada',`${L}: Rc ${f2(Rc)} Ω × ${f1(Id)} A = ${f1(Vd)} V > ${f1(E.Vmax)} V. Rc máx. admisible: ${f2(c.RcMax)} Ω.`,L)}
+      else add('o','T55D','Acoplamiento correcto',`${L}: Vd = ${f1(Vd)} V ≤ ${f1(E.Vmax)} V (margen hasta Id ${isFinite(c.IdMax)?f1(c.IdMax)+' A':'∞'}).`,L);
+    }
+    calcs.push(c);
+  });
+  return {out,calcs};
+}
+
+function update(){
+  const {out,calcs}=evaluate();
+  // pastillas de cálculo por TR
+  calcs.forEach(c=>{
+    const el=$('calc'+c.i);if(!el)return;let h='';
+    if(c.Rc!==undefined) h+=`<span class="pill ${c.bad?'bad':''}">Rc ${f2(c.Rc)} Ω</span>`;
+    if(c.Vd!==undefined) h+=`<span class="pill ${c.vdBad?'bad':'ok'}">Vd ${f1(c.Vd)} V</span>`;
+    if(c.RcMax!==undefined&&!c.bad) h+=`<span class="pill">Rc máx ${f2(c.RcMax)} Ω</span>`;
+    el.innerHTML=h;
+  });
+  const nD=out.filter(r=>r.type==='d').length,nW=out.filter(r=>r.type==='w').length,nP=out.filter(r=>r.type==='p').length;
+  let s;
+  if(nD) s=`<div class="summary s-bad"><div class="big">${nD}</div><div class="txt">${nD===1?'Defecto detectado':'Defectos detectados'}<small>${uniq(out.filter(r=>r.type==='d').map(r=>r.code)).join(' · ')}${nW?` — ${nW} aviso${nW>1?'s':''}`:''}</small></div></div>`;
+  else if(nP||!hasData()) s=`<div class="summary s-pend"><div class="big">…</div><div class="txt">Faltan datos<small>Completa las medidas para comprobar</small></div></div>`;
+  else s=`<div class="summary s-ok"><div class="big">✓</div><div class="txt">Sin defectos<small>${nW?`${nW} aviso${nW>1?'s':''} a revisar`:'Todas las comprobaciones correctas'}</small></div></div>`;
+  $('summary').innerHTML=s;
+  const shown=filter==='all'?out:out.filter(r=>r.type==='d'||r.type==='w'||r.type==='p');
+  $('results').innerHTML=shown.length?shown.map(r=>`<div class="res ${r.type}"><div class="code">${r.code}</div><div><div class="t">${esc(r.title)}</div><div class="x">${esc(r.detail)}</div></div></div>`).join(''):`<div class="empty">Nada que destacar.</div>`;
+  saveDraft();
+  return out;
+}
+const uniq=a=>[...new Set(a)];
+function hasData(){return $('RmNo').checked||num($('Rm').value)!==null||trs.some(t=>t.RnNo||num(t.Rn)!==null)}
+
+$('filter').onclick=e=>{const f=e.target.dataset.f;if(!f)return;filter=f;
+  [...$('filter').children].forEach(b=>b.classList.toggle('on',b.dataset.f===f));update()};
+['Rm','lim','Id','linea','cd','fecha'].forEach(id=>$(id).addEventListener('input',update));
+$('RmNo').addEventListener('change',()=>{$('Rm').disabled=$('RmNo').checked;update()});
+
+/* ---------- Estado / borrador ---------- */
+function getState(){return{prov:curProv(),linea:$('linea').value.trim(),cd:$('cd').value.trim(),fecha:$('fecha').value,
+  Rm:$('Rm').value,RmNo:$('RmNo').checked,lim:$('lim').value,Id:$('Id').value,trs:JSON.parse(JSON.stringify(trs))}}
+function setState(s){
+  $('prov').value=s.prov&&PROVINCIAS.includes(s.prov)?s.prov:defProv;showProv();
+  $('linea').value=s.linea||'';$('cd').value=s.cd||'';$('fecha').value=s.fecha||today();
+  $('Rm').value=s.Rm||'';$('RmNo').checked=!!s.RmNo;$('Rm').disabled=!!s.RmNo;
+  $('lim').value=s.lim??'';$('Id').value=s.Id??'';
+  trs=(s.trs&&s.trs.length)?s.trs:[{Rn:'',RnNo:false,Rmn:''}];renderTrs();update();
+}
+function blank(){const E=eff(defProv);return{prov:defProv,fecha:today(),Id:fmtIn(E.Id),lim:fmtIn(E.Lim),trs:[{Rn:'',RnNo:false,Rmn:''}]}}
+const fmtIn=v=>v==null?'':String(v).replace('.',',');
+/* ---------- Provincia ---------- */
+$('prov').innerHTML=PROVINCIAS.map(p=>`<option>${p}</option>`).join('');
+function showProv(){
+  const p=curProv(),E=eff(p),el=$('provInfo');
+  if(E.has){el.className='provinfo ok';
+    el.innerHTML=`${esc(p)}: Id ${f1(E.Id)} A · herrajes ${E.Lim!=null?f2(E.Lim)+' Ω':'sin límite'} · Vmáx ${f1(E.Vmax)} V · Rn ≤ ${f2(E.RnMax)} Ω · <a href="#" data-cfg>editar</a>`}
+  else{el.className='provinfo none';
+    el.innerHTML=`Sin valores guardados para ${esc(p)}: se usan los generales y no hay límite de herrajes. <a href="#" data-cfg>Configurar ${esc(p)}</a>`}
+}
+function applyProv(){const E=eff(curProv());$('Id').value=fmtIn(E.Id);$('lim').value=fmtIn(E.Lim);showProv();update()}
+$('prov').addEventListener('change',applyProv);
+$('provInfo').addEventListener('click',e=>{if(e.target.dataset.cfg===undefined)return;e.preventDefault();openCfg(curProv())});
+
+function saveDraft(){store.set('ce_draft',{s:getState(),editingId})}
+
+/* ---------- Compartir ---------- */
+function reportText(){
+  const s=getState(),out=evaluate().out;
+  const d=out.filter(r=>r.type==='d'),w=out.filter(r=>r.type==='w');
+  let t=`*CheckEarth · PAT*\n`;
+  if(s.linea) t+=`Línea: ${s.linea}\n`;
+  if(s.cd) t+=`CD/CT: ${s.cd}\n`;
+  t+=`Provincia: ${s.prov||'-'}\n`;
+  t+=`Fecha: ${s.fecha?s.fecha.split('-').reverse().join('/'):'-'}\n\n`;
+  t+=`Rm herrajes: ${s.RmNo?'NO EXISTE':(num(s.Rm)!==null?f2(num(s.Rm))+' Ω':'-')}\n`;
+  if(num(s.lim)!==null) t+=`Límite proyecto: ${f2(num(s.lim))} Ω\n`;
+  if(num(s.Id)!==null) t+=`Id: ${f1(num(s.Id))} A\n`;
+  s.trs.forEach((x,i)=>{
+    if(x.RnNo){t+=`TR${i+1}: neutro NO EXISTE\n`;return}
+    const Rn=num(x.Rn),Rmn=num(x.Rmn),Rm=num(s.Rm);
+    let l=`TR${i+1}: Rn ${Rn!==null?f2(Rn):'-'} Ω · Rmn ${Rmn!==null?f2(Rmn):'-'} Ω`;
+    if(Rn!==null&&Rmn!==null&&Rm!==null&&!s.RmNo){const Rc=(Rm+Rn-Rmn)/2;l+=` · Rc ${f2(Rc)} Ω`;const Id=num(s.Id);if(Id)l+=` · Vd ${f1(Rc*Id)} V`}
+    t+=l+'\n';
+  });
+  t+=`\n${d.length?`❌ *${d.length} defecto${d.length>1?'s':''}*`:'✅ *Sin defectos*'}\n`;
+  d.forEach(r=>t+=`• ${r.code} — ${r.title}${r.tr?` (${r.tr})`:''}\n`);
+  w.forEach(r=>t+=`⚠️ ${r.code} — ${r.title}${r.tr?` (${r.tr})`:''}\n`);
+  return t.trim();
+}
+$('btnShare').onclick=async()=>{
+  const t=reportText();
+  if(navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+};
+
+/* ---------- Historial ---------- */
+const hist=()=>store.get('ce_hist',[]);
+$('btnSave').onclick=()=>{
+  if(!hasData()){toast('Introduce alguna medida antes de guardar');return}
+  const s=getState(),out=evaluate().out;
+  const rec={id:editingId||Date.now(),saved:Date.now(),s,defs:uniq(out.filter(r=>r.type==='d').map(r=>r.code))};
+  const h=hist().filter(x=>x.id!==rec.id);h.unshift(rec);store.set('ce_hist',h);
+  editingId=rec.id;saveDraft();toast(rec.defs.length?`Guardado · ${rec.defs.join(', ')}`:'Guardado · sin defectos');
+};
+$('btnNew').onclick=()=>{
+  if(hasData()&&!confirm('¿Empezar una comprobación nueva? Lo no guardado se perderá.'))return;
+  editingId=null;setState(blank());window.scrollTo({top:0,behavior:'smooth'});
+};
+function renderHist(){
+  const h=hist();
+  $('histList').innerHTML=h.length?h.map(r=>`
+    <div class="hist" data-id="${r.id}">
+      <div class="m"><b>${esc(r.s.cd||'Sin nº')} ${r.s.linea?'· '+esc(r.s.linea):''}</b>
+        <small>${r.s.fecha?r.s.fecha.split('-').reverse().join('/'):''}${r.s.prov?' · '+esc(r.s.prov):''} · ${r.s.trs.length} TR</small></div>
+      <span class="badge ${r.defs.length?'bad':'ok'}">${r.defs.length?esc(r.defs.join(' ')):'OK'}</span>
+      <button class="del" data-rm="${r.id}" aria-label="Borrar">✕</button>
+    </div>`).join(''):'<div class="empty">Aún no has guardado comprobaciones.</div>';
+}
+$('histList').onclick=e=>{
+  const rm=e.target.dataset.rm;
+  if(rm){if(confirm('¿Borrar este registro?')){store.set('ce_hist',hist().filter(x=>String(x.id)!==rm));renderHist()}return}
+  const row=e.target.closest('.hist');if(!row)return;
+  const r=hist().find(x=>String(x.id)===row.dataset.id);if(!r)return;
+  editingId=r.id;setState(r.s);$('dlgHist').close();toast('Comprobación cargada');
+};
+$('btnCsv').onclick=()=>{
+  const h=hist();if(!h.length){toast('No hay registros');return}
+  const rows=[['Fecha','Provincia','Línea','CD/CT','Rm (Ω)','Sin PAT protección','Límite proyecto (Ω)','Id (A)','TR','Rn (Ω)','Sin PAT neutro','Rmn (Ω)','Rc (Ω)','Vd (V)','Defectos del CD']];
+  h.slice().reverse().forEach(r=>{const s=r.s;const Rm=num(s.Rm),Id=num(s.Id);
+    s.trs.forEach((t,i)=>{const Rn=num(t.Rn),Rmn=num(t.Rmn);let Rc='',Vd='';
+      if(!t.RnNo&&!s.RmNo&&Rm!==null&&Rn!==null&&Rmn!==null){Rc=(Rm+Rn-Rmn)/2;if(Id)Vd=Rc*Id}
+      const n=v=>v===''||v===null?'':String(Math.round(v*100)/100).replace('.',',');
+      rows.push([s.fecha?s.fecha.split('-').reverse().join('/'):'',s.prov||'',s.linea,s.cd,n(Rm),s.RmNo?'Sí':'',n(num(s.lim)),n(Id),'TR'+(i+1),n(Rn),t.RnNo?'Sí':'',n(Rmn),n(Rc),n(Vd),r.defs.join(' ')]);
+    });
+  });
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`CheckEarth_${today()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+$('btnClear').onclick=()=>{if(confirm('¿Borrar TODO el historial?')){store.set('ce_hist',[]);renderHist()}};
+
+/* ---------- Criterios ---------- */
+function saveP(){store.set('ce_prov',ptab);store.set('ce_cfg',cfg);store.set('ce_defprov',defProv)}
+$('pSel').innerHTML=PROVINCIAS.map(p=>`<option>${p}</option>`).join('');
+function fillP(){
+  const p=$('pSel').value,v=ptab[p]||{};
+  $('pId').value=fmtIn(v.Id);$('pLim').value=fmtIn(v.Lim);$('pVmax').value=fmtIn(v.Vmax);$('pRn').value=fmtIn(v.RnMax);
+  $('pId').placeholder=`General ${cfg.Id}`;$('pVmax').placeholder=`General ${cfg.Vmax}`;$('pRn').placeholder=`General ${cfg.RnMax}`;
+  $('pDefault').textContent=p===defProv?'Predeterminada ✓':'Fijar como predeterminada';$('pDefault').disabled=p===defProv;
+  renderPTable();
+}
+function renderPTable(){
+  const p=$('pSel').value;
+  const rows=Object.keys(ptab).filter(k=>PKEYS.some(x=>ptab[k][x]!=null)).sort((x,y)=>x.localeCompare(y,'es'));
+  const c=x=>x==null?'—':f2(x);
+  $('pTable').innerHTML=rows.length?`<table class="ptable"><tr><th>Provincia</th><th>Id</th><th>Herrajes</th><th>Vmáx</th><th>Rn</th></tr>${rows.map(k=>{const q=ptab[k];return`<tr data-p="${esc(k)}" class="${k===p?'cur':''}"><td>${esc(k)}${k===defProv?' ★':''}</td><td>${c(q.Id)}</td><td>${c(q.Lim)}</td><td>${c(q.Vmax)}</td><td>${c(q.RnMax)}</td></tr>`}).join('')}</table>`:'<p class="hint">Ninguna provincia con valores todavía.</p>';
+}
+function openCfg(p){$('pSel').value=p||curProv();fillP();$('cVmax').value=cfg.Vmax;$('cRn').value=cfg.RnMax;$('cId').value=cfg.Id;if(!$('dlgCfg').open)$('dlgCfg').showModal()}
+$('pSel').addEventListener('change',fillP);
+$('pTable').addEventListener('click',e=>{const r=e.target.closest('tr[data-p]');if(r){$('pSel').value=r.dataset.p;fillP()}});
+['pId','pLim','pVmax','pRn'].forEach((id,ix)=>$(id).addEventListener('input',()=>{
+  const p=$('pSel').value,k=PKEYS[ix],v=num($(id).value),o=Object.assign({},ptab[p]);
+  if(v===null||v<=0)delete o[k];else o[k]=v;
+  if(Object.keys(o).length)ptab[p]=o;else delete ptab[p];
+  saveP();renderPTable();
+  if(p===curProv()){if(k==='Id')$('Id').value=fmtIn(eff(p).Id);if(k==='Lim')$('lim').value=fmtIn(eff(p).Lim);showProv();update()}
+}));
+['cVmax','cRn','cId'].forEach(id=>$(id).addEventListener('input',()=>{
+  const v=num($('cVmax').value),r=num($('cRn').value),i=num($('cId').value);
+  if(v>0)cfg.Vmax=v;if(r>0)cfg.RnMax=r;if(i>0)cfg.Id=i;saveP();showProv();update();
+}));
+$('pDefault').onclick=()=>{defProv=$('pSel').value;saveP();fillP();toast(`${defProv} será la provincia por defecto`)};
+$('pClear').onclick=()=>{const p=$('pSel').value;if(!ptab[p])return;if(!confirm(`¿Borrar los valores de ${p}?`))return;
+  delete ptab[p];saveP();fillP();if(p===curProv())applyProv()};
+$('pExport').onclick=()=>{
+  const data={app:'CheckEarth',tipo:'tabla-provincias',version:1,exportado:today(),general:cfg,predeterminada:defProv,provincias:ptab};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download=`CheckEarth_provincias_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+$('pImport').onclick=()=>$('pFile').click();
+$('pFile').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='CheckEarth'||!d.provincias||typeof d.provincias!=='object')throw 0;
+    const n=Object.keys(d.provincias).filter(k=>PROVINCIAS.includes(k));
+    if(!confirm(`¿Importar valores de ${n.length} provincia${n.length===1?'':'s'}? Se sustituirán los de esas provincias.`))return;
+    n.forEach(k=>{const o={};PKEYS.forEach(x=>{const v=num(d.provincias[k][x]);if(v>0)o[x]=v});if(Object.keys(o).length)ptab[k]=o;else delete ptab[k]});
+    if(d.general)['Vmax','RnMax','Id'].forEach(x=>{const v=num(d.general[x]);if(v>0)cfg[x]=v});
+    saveP();openCfg($('pSel').value);applyProv();toast('Tabla importada');
+  }catch(err){toast('Archivo no válido')}
+};
+$('cfgReset').onclick=()=>{if(!confirm('¿Restaurar los valores de fábrica? Se perderán los que hayas configurado.'))return;
+  cfg=clone(DEF_CFG);ptab=clone(TABLA_BASE);defProv=DEF_PROV;saveP();openCfg(curProv());applyProv();toast('Criterios restaurados')};
+$('btnCfg').onclick=()=>openCfg(curProv());
+$('btnHist').onclick=()=>{renderHist();$('dlgHist').showModal()};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+
+/* ---------- Inicio ---------- */
+const dr=store.get('ce_draft',null);
+if(dr&&dr.s){editingId=dr.editingId||null;setState(dr.s)}else setState(blank());
+})();
 </script>
 </body>
 </html>

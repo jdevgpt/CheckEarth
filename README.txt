@@ -1,15 +1,26 @@
+CheckEarth — Defectos en puestas a tierra (CD/CT)
+--------------------------------------------------
+Archivo único: index.html (HTML + CSS + JS). Súbelo al repositorio para GitHub Pages.
 
-Checker PAT - CT (simple web app)
---------------------------------
-Files:
-- index.html : single-file app (HTML + CSS + JS)
+Uso:
+- Elige la provincia: se cargan su Id y su límite de herrajes, y se aplican sus criterios.
+- Rellena línea, nº CD y fecha; Rm de herrajes, límite del proyecto (opcional) e Id.
+- Añade hasta 6 transformadores con Rn (neutro) y Rmn (herrajes–neutro).
+- El resultado se calcula al momento. Guardar lo pasa al historial; Compartir lo envía por WhatsApp.
+- Historial → Exportar Excel (CSV).
+- Engranaje (⚙) → valores por provincia (Id, límite herrajes, Vmáx, Rn máx), valores generales
+  y provincia predeterminada. "Exportar tabla" genera un .json que otro usuario puede importar.
 
-How to use:
-- Unzip and open index.html in a browser (or deploy to GitHub Pages).
-- Enter herrajes (Rm), project limits (opcional), Id (intensidad de defecto), and values for up to 6 TRs.
-- Click 'Comprobar defectos' to get a table of detected defects (T51D, T53D, T55D, T62D, T65D) with explanations.
+Valores de fábrica por provincia:
+- Están en index.html, en la constante TABLA_BASE. Lo que pongas ahí lo tendrá cualquiera que abra la app.
+  Ejemplo:  'Cáceres':{Id:300,Lim:400},
 
-Notes:
-- This tool is an aid. It uses the logic described in Guía FED029 (codes T51D, T53D, T55D, T62D, T65D).
-- For territorial checks (T53D) you must supply either the project limit or consult the territorial table in the guide.
-- The app does not replace field judgment or procedures NEZ004/NMZ002.
+Comprobaciones (Guía FED029):
+- T51D  No existe PAT de protección / sin registro
+- T53D  Rm > límite del proyecto o tabla territorial
+- T55D  Vd = Rc × Id > Vmáx (1000 V), con Rc = (Rm + Rn − Rmn) / 2
+- T62D  Rn neutro > 37 Ω
+- T65D  No existe PAT de neutro
+- Aviso de medidas incoherentes si Rc sale fuera de 0…min(Rm, Rn)
+
+Herramienta orientativa: no sustituye el criterio en campo ni los procedimientos NEZ004/NMZ002.

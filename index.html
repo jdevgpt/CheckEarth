@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ff6a00">
+<meta name="theme-color" content="#ffffff">
 <title>CheckEarth · PAT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&display=swap">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
   --bg:#f4f5f6; --card:#fff; --ink:#1f2328; --muted:#6b7178; --line:#e3e6e9;
@@ -107,17 +112,32 @@ dialog::backdrop{background:rgba(20,22,25,.45)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .formula{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#f6f7f8;border-radius:8px;padding:8px 10px;color:#333;margin-top:8px}
 @media (max-width:420px){.grid{grid-template-columns:1fr}.grid.keep{grid-template-columns:1fr 1fr}}
+
+/* ===== Identidad JDev (solo apariencia) ===== */
+.jd-tile{width:38px;height:38px;border-radius:10px;background:#EE6A1C;color:#fff;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.jd-tile svg{width:22px;height:22px;display:block}
+.jd-strip{background:var(--jd-strip-bg,#fff);border-bottom:3px solid #EE6A1C;height:60px;display:flex;justify-content:flex-end;overflow:hidden}
+.jd-banner{display:block;height:100%;width:auto;max-width:none;flex:none;color:var(--jd-trazo,#A9AEB5);-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%);mask-image:linear-gradient(90deg,transparent 0,#000 22%)}
+.jdev{font-family:"Barlow", "Segoe UI", system-ui, sans-serif!important;font-weight:600}
+@media (max-width:360px){.jd-strip{height:50px}}
+
+:root{--bg:#F2F3F5;--card:#fff;--ink:#262A2F;--muted:#5E656E;--line:#DDE0E4;--accent:#EE6A1C;--accent-soft:#FFF2E8}
+header{gap:11px}
+header h1{font-family:"Barlow", "Segoe UI", system-ui, sans-serif;font-size:21px;font-weight:700}
+h2,h3,.b,.icon{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
+
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">PT</div>
+  <span class="jd-tile" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9.5M5 12.5h14M7.6 16h8.8M10.2 19.5h3.6"/></svg></span>
   <div><h1>CheckEarth</h1><small>Defectos en PAT · CD/CT</small></div>
   <div class="hbtn">
     <button class="icon" id="btnHist" aria-label="Historial">Historial</button>
     <button class="icon" id="btnCfg" aria-label="Criterios">⚙</button>
   </div>
 </header>
+<div class="jd-strip" aria-hidden="true"><svg class="jd-banner" viewBox="0 0 360 101" preserveAspectRatio="xMaxYMax meet" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M150 80V46H202V80M147 46H205M156 80V56H168V80M174 55h16M174 59h16M174 63h16"/><path stroke="#EE6A1C" stroke-width="1.7" d="M182 64L187.5 73H176.5Z"/><path stroke="#EE6A1C" stroke-width="1.7" d="M182.6 66.8L180.8 70H183L181.4 72"/><path d="M0 80H360"/><path d="M0 85H360M0 91H360" stroke-dasharray="2 5" opacity=".6"/><path stroke="#EE6A1C" stroke-width="1.7" d="M110 80V93M104 93h12M106 96h8M108 99h4"/><path stroke="#EE6A1C" stroke-width="1.7" d="M236 80V93M230 93h12M232 96h8M234 99h4"/><path stroke="#EE6A1C" stroke-width="1.7" d="M300 80V93M294 93h12M296 96h8M298 99h4"/><path d="M110 80Q130 86 150 80M202 80Q219 86 236 80M236 80Q268 86 300 80"/><text x="318" y="72" fill="#EE6A1C" stroke="none" font-family="Barlow,system-ui,sans-serif" font-weight="600" font-size="15">Ω</text><path d="M38.5 80L39.2 34H40.8L41.5 80M32 38H48"/><circle cx="33" cy="36.5" r="1.2"/><circle cx="47" cy="36.5" r="1.2"/></svg></div>
 
 <main>
   <section class="card">

@@ -127,6 +127,10 @@ header h1{font-family:"Barlow", "Segoe UI", system-ui, sans-serif;font-size:21px
 h2,h3,.b,.icon{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
 
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CheckEarth">
 </head>
 <body>
 <header>
@@ -560,6 +564,10 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if
 const dr=store.get('ce_draft',null);
 if(dr&&dr.s){editingId=dr.editingId||null;setState(dr.s)}else setState(blank());
 })();
+</script>
+<script>/* App instalable y sin conexión */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+try{if(navigator.storage&&navigator.storage.persist&&(matchMedia('(display-mode: standalone)').matches||navigator.standalone))navigator.storage.persist();}catch(e){}
 </script>
 </body>
 </html>

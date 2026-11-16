@@ -42,6 +42,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var
 input:disabled{background:#f1f2f3;color:#aaa}
 select{width:100%;height:46px;border:1px solid #d3d7db;border-radius:10px;padding:0 12px;font-size:17px;background:#fff;color:var(--ink);appearance:auto}
 select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.pista{font-size:12.5px;margin-top:5px;color:var(--muted);font-weight:600}
 .provinfo{font-size:12.5px;margin-top:6px;border-radius:8px;padding:7px 10px;background:#f1f2f3;color:var(--muted)}
 .provinfo.ok{background:var(--accent-soft);color:#8a3b00}
 .provinfo.none{background:var(--warn-soft);color:var(--warn)}
@@ -151,7 +152,7 @@ h2,h3,.b,.icon{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
         <select id="prov"></select>
         <div class="provinfo" id="provInfo"></div></div>
       <div class="full"><label class="f" for="linea">Línea</label><input type="text" id="linea" placeholder="Nombre de la línea" autocomplete="off"></div>
-      <div><label class="f" for="cd">Nº CD / CT</label><input type="text" id="cd" placeholder="Ej. 140123" autocomplete="off"></div>
+      <div><label class="f" for="cd">Nº CD / CT</label><input type="text" id="cd" placeholder="Ej. 140123" autocomplete="off" inputmode="numeric"><div class="pista" id="cdPista"></div></div>
       <div><label class="f" for="fecha">Fecha</label><input type="date" id="fecha"></div>
     </div>
   </section>
@@ -251,6 +252,7 @@ h2,h3,.b,.icon{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
 
 <div class="toast" id="toast"></div>
 
+<script src="lineas.js"></script>
 <script>
 (()=>{
 const MAX_TR=6;
@@ -398,6 +400,7 @@ function hasData(){return $('RmNo').checked||num($('Rm').value)!==null||trs.some
 $('filter').onclick=e=>{const f=e.target.dataset.f;if(!f)return;filter=f;
   [...$('filter').children].forEach(b=>b.classList.toggle('on',b.dataset.f===f));update()};
 ['Rm','lim','Id','linea','cd','fecha'].forEach(id=>$(id).addEventListener('input',update));
+LineasCD.vincular($('cd'),$('linea'),{pista:$('cdPista')});
 $('RmNo').addEventListener('change',()=>{$('Rm').disabled=$('RmNo').checked;update()});
 
 /* ---------- Estado / borrador ---------- */
